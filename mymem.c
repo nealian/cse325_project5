@@ -107,7 +107,7 @@ void myfree(void* block) {
 
 /* Get the number of contiguous areas of free space in memory. */
 int mem_holes() {
-  return 0;
+  return mem_small_free(mySize + 1);
 }
 
 /* Get the number of bytes allocated */
