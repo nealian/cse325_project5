@@ -5,7 +5,6 @@
 #include "mymem.h"
 #include <time.h>
 
-
 /* The main structure for implementing memory allocation.
  * You may change this to fit your implementation.
  */
@@ -22,8 +21,13 @@ struct memoryList
   void *ptr;           // location of block in memory pool.
 };
 
-strategies myStrategy = NotSet;    // Current strategy
+/* Prototypes for helper functions */
+struct memoryList* first_block(size_t requested);
+struct memoryList* best_block(size_t requested);
+struct memoryList* worst_block(size_t requested);
+struct memoryList* next_block(size_t requested);
 
+strategies myStrategy = NotSet;    // Current strategy
 
 size_t mySize;
 void *myMemory = NULL;
@@ -77,20 +81,60 @@ void initmem(strategies strategy, size_t sz) {
 
 void *mymalloc(size_t requested) {
   assert((int)myStrategy > 0);
-  
+
+  struct memoryList* block = NULL;
   switch (myStrategy) {
-    case NotSet: 
-      return NULL;
     case First:
-      return NULL;
+      block = first_block(requested);
+      break;
     case Best:
-      return NULL;
+      block = best_block(requested);
+      break;
     case Worst:
-      return NULL;
+      block = worst_block(requested);
+      break;
     case Next:
+      block = next_block(requested);
+      break;
+    default:
+      /* Strategy not set */
+      fprintf(stderr, "myalloc: Invalid memory management strategy!\n");
       return NULL;
   }
+
+  if(!block) {
+    /* No valid blocks */
+    fprintf(stderr, "myalloc: No available blocks of size %lu!\n", requested);
+    return NULL;
+  }
+
+  // TODO: allocate memory
   return NULL;
+}
+
+/* Find the first available block of memory larger than the requested size. */
+struct memoryList* first_block(size_t requested) {
+  // TODO
+  return NULL;
+}
+
+/* Find the smallest available block larger than the requested size. */
+struct memoryList* best_block(size_t requested) {
+  // TODO
+  return NULL;
+}
+
+/* Find the largest available block larger than the requested size. */
+struct memoryList* worst_block(size_t requested) {
+  // TODO
+  return NULL;
+}
+
+/* Find the first suitable block after the last block allocated. */
+struct memoryList* next_block(size_t requested) {
+  // TODO
+  return NULL;
+
 }
 
 /* Frees a block of memory previously allocated by mymalloc. */
