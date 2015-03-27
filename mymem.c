@@ -130,9 +130,26 @@ int mem_small_free(int size) {
   return 0;
 }       
 
-/* Is a particular byte allocated or not? */
+/* Is a particular byte allocated or not?
+ * A necessary precondition of this function is that ptr points to somewhere in
+ * the block allocated for our memory list. In fact, C99 defines pointer
+ * comparison only for pointers that point to parts of the same memory object.
+ */
 char mem_is_alloc(void *ptr) {
-  return 0;
+
+  /* Iterate over the memory list */
+  struct memoryList* index = head;
+  while(index->next != head) {
+    /* If the next block's ptr is after the target,
+       the target must be in this block */
+    if(ptr < index->next->ptr) {
+      return index->alloc;
+    }
+    index = index->next;
+  }
+
+  /* Iterator is now at the last block, so we assume the target is here */
+  return index->alloc;
 }
 
 /* 
