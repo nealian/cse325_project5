@@ -237,7 +237,7 @@ int mem_largest_free() {
   /* Iterate over memory list */
   struct memoryList* index = head;
   do {
-    if(index->size > max_size) {
+    if(!(index->alloc) && index->size > max_size) {
       max_size = index->size;
     }
   } while((index = index->next) != head);
