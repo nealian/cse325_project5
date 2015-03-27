@@ -112,7 +112,7 @@ int mem_holes() {
 
 /* Get the number of bytes allocated */
 int mem_allocated() {
-  return 0;
+  return mySize - mem_free();
 }
 
 /* Number of non-allocated bytes */
