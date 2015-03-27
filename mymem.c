@@ -49,21 +49,24 @@ static struct memoryList *next;
 void initmem(strategies strategy, size_t sz) {
   myStrategy = strategy;
 
-  /* all implementations will need an actual block of memory to use */
+  /* All implementations will need an actual block of memory to use */
   mySize = sz;
 
-  if (myMemory != NULL) free(myMemory); /* in case this is not the first time
-                                           initmem is called */
+  /* Release anything used by a memory-management process already under way */
+  if(myMemory) free(myMemory);
+  if(head) free(head);
+  if(next) free(next);
 
-  /* TODO: release any othermemoryyou were using for bookkeeping
-     when doing a re-initialization! */
-
-
+  /* Initialize memory management structures */
   myMemory = malloc(sz);
-	
-  /* TODO: Initialize memory management structure. */
+  head = malloc(sizeof(struct memoryList));
+  head->size = sz;
+  head->alloc = 0;
+  head->ptr = myMemory;
 
-
+  /* Memory list should be circular for next-fit */
+  head->last = head;
+  head->next = head;
 }
 
 /* Allocate a block of memory with the requested size.
