@@ -35,7 +35,6 @@ void *myMemory = NULL;
 static struct memoryList *head;
 static struct memoryList *next;
 
-
 /* initmem must be called prior to mymalloc and myfree.
 
    initmem may be called more than once in a given execution;
@@ -108,8 +107,27 @@ void *mymalloc(size_t requested) {
     return NULL;
   }
 
-  // TODO: allocate memory
-  return NULL;
+  if(block->size > requested) {
+    /* Construct container for unallocated remainder of this block */
+    struct memoryList* remainder = malloc(sizeof(struct memoryList));
+    
+    /* Insert into linked list */
+    remainder->next = block->next;
+    remainder->next->last = remainder;
+    remainder->last = block;
+    block->next = remainder;
+    
+    /* Divide up allocated memory */
+    remainder->size = block->size - requested;
+    remainder->alloc = 0;
+    remainder->ptr = block->ptr + requested;
+    block->size = requested;
+  }
+  
+  block->alloc = 1;
+  
+  /* Return pointer to the allocated block */
+  return block->ptr;
 }
 
 /* Find the first available block of memory larger than the requested size. */
