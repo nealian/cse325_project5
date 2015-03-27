@@ -254,7 +254,7 @@ int mem_small_free(int size) {
   struct memoryList* index = head;
   do {
     /* Add to total only if this block's size is less than the target */
-    if(index->size < size) {
+    if(index->size <= size) {
       count += !(index->alloc);
     }
   } while((index = index->next) != head);
@@ -331,7 +331,6 @@ strategies strategyFromString(char * strategy) {
     return 0;
   }
 }
-
 
 /* 
  * These functions are for you to modify however you see fit.  These will not
