@@ -93,10 +93,38 @@ void *mymalloc(size_t requested) {
   return NULL;
 }
 
-
 /* Frees a block of memory previously allocated by mymalloc. */
 void myfree(void* block) {
-  return;
+
+  /* Iterate over memory list, searching for the target block's container */
+  struct memoryList* container = head;
+  do {
+    if(container->ptr == block) {
+      break;
+    }
+  } while((container = container->next) != head);
+
+  /* Flag this block as freed */
+  container->alloc = 0;
+
+  /* If the previous block is also free, reduce to one contiguous block. */
+  if(container != head && !(container->last->alloc)) {
+    struct memoryList* prev = container->last;
+    prev->next = container->next;
+    prev->next->last = prev;
+    prev->size += container->size;
+    free(container);
+    container = prev;
+  }
+
+  /* If the next block is also free, reduce to one contiguous block. */
+  if(container->next != head && !(container->next->alloc)) {
+    struct memoryList* next = container->next;
+    container->next = next->next;
+    container->next->last = container;
+    container->size += next->size;
+    free(next);
+  }
 }
 
 /****** Memory status/property functions ******
