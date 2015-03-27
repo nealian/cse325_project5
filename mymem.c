@@ -127,7 +127,19 @@ int mem_largest_free() {
 
 /* Number of free blocks smaller than "size" bytes. */
 int mem_small_free(int size) {
-  return 0;
+  
+  int count = 0;
+
+  /* Iterate over memory list */
+  struct memoryList* index = head;
+  do {
+    /* Add to total only if this block's size is less than the target */
+    if(index->size < size) {
+      count += !(index->alloc);
+    }
+  } while((index = index->next) != head);
+
+  return count;
 }       
 
 /* Is a particular byte allocated or not?
