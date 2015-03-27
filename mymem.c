@@ -58,7 +58,6 @@ void initmem(strategies strategy, size_t sz) {
   /* Release anything used by a memory-management process already under way */
   if(myMemory) free(myMemory);
   if(head) free(head);
-  if(next) free(next);
 
   /* Initialize memory management structures */
   myMemory = malloc(sz);
@@ -66,6 +65,7 @@ void initmem(strategies strategy, size_t sz) {
   head->size = sz;
   head->alloc = 0;
   head->ptr = myMemory;
+  next = head;
 
   /* Memory list should be circular for next-fit */
   head->last = head;
@@ -122,6 +122,9 @@ void *mymalloc(size_t requested) {
     remainder->alloc = 0;
     remainder->ptr = block->ptr + requested;
     block->size = requested;
+    next = remainder;
+  } else {
+    next = block->next;
   }
   
   block->alloc = 1;
@@ -180,7 +183,15 @@ struct memoryList* worst_block(size_t requested) {
 
 /* Find the first suitable block after the last block allocated. */
 struct memoryList* next_block(size_t requested) {
-  // TODO
+  
+  struct memoryList* start = next;
+  do {
+    if(!(next->alloc) && next->size >= requested) {
+      return next;
+    }
+  } while((next = next->next) != start);
+
+  /* No suitable block in the memory list */
   return NULL;
 }
 
@@ -204,17 +215,27 @@ void myfree(void* block) {
     prev->next = container->next;
     prev->next->last = prev;
     prev->size += container->size;
+    
+    if(next == container) {
+      next = prev;
+    }
+    
     free(container);
     container = prev;
   }
 
   /* If the next block is also free, reduce to one contiguous block. */
   if(container->next != head && !(container->next->alloc)) {
-    struct memoryList* next = container->next;
-    container->next = next->next;
+    struct memoryList* second = container->next;
+    container->next = second->next;
     container->next->last = container;
-    container->size += next->size;
-    free(next);
+    container->size += second->size;
+    
+    if(next == second) {
+      next = container;
+    }
+    
+    free(second);
   }
 }
 
