@@ -116,8 +116,19 @@ int mem_allocated() {
 }
 
 /* Number of non-allocated bytes */
-int mem_free() {
-  return 0;
+int mem_free() {    
+  int count = 0;
+
+  /* Iterate over memory list */
+  struct memoryList* index = head;
+  do {
+    /* Add to total only if this block isn't allocated */
+    if(!(index->alloc)) {
+      count += index->size;
+    }
+  } while((index = index->next) != head);
+
+  return count;
 }
 
 /* Number of bytes in the largest contiguous area of unallocated memory */
