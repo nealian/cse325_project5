@@ -147,8 +147,17 @@ struct memoryList* first_block(size_t requested) {
 
 /* Find the smallest available block larger than the requested size. */
 struct memoryList* best_block(size_t requested) {
-  // TODO
-  return NULL;
+  
+  struct memoryList* index = head, *min = NULL;
+  do {
+    if(!(index->alloc)
+       && index->size >= requested
+       && (!min || index->size < min->size) ) {
+      min = index;
+    }
+  } while((index = index->next) != head);
+
+  return min;
 }
 
 /* Find the largest available block larger than the requested size. */
