@@ -1,7 +1,6 @@
 #include <stddef.h>
 
-typedef enum strategies_enum
-{
+typedef enum strategies_enum {
 	NotSet = 0,
 	Best = 1,
 	Worst = 2,
