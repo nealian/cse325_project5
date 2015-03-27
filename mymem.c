@@ -340,7 +340,16 @@ strategies strategyFromString(char * strategy) {
 
 /* Use this function to print out the current contents of memory. */
 void print_memory() {
-  return;
+  printf("Memory List {\n");
+  /* Iterate over memory list */
+  struct memoryList* index = head;
+  do {
+    printf("\tBlock %p,\tsize %d,\t%s\n",
+           index->ptr,
+           index->size,
+           (index->alloc ? "[ALLOCATED]" : "[FREE]"));
+  } while((index = index->next) != head);
+  printf("}\n");
 }
 
 /* Use this function to track memory allocation performance.  
