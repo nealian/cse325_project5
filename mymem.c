@@ -35,7 +35,6 @@ void *myMemory = NULL;
 static struct memoryList *head;
 static struct memoryList *next;
 
-
 /* initmem must be called prior to mymalloc and myfree.
 
    initmem may be called more than once in a given execution;
@@ -53,21 +52,24 @@ static struct memoryList *next;
 void initmem(strategies strategy, size_t sz) {
   myStrategy = strategy;
 
-  /* all implementations will need an actual block of memory to use */
+  /* All implementations will need an actual block of memory to use */
   mySize = sz;
 
-  if (myMemory != NULL) free(myMemory); /* in case this is not the first time
-                                           initmem is called */
+  /* Release anything used by a memory-management process already under way */
+  if(myMemory) free(myMemory);
+  if(head) free(head);
+  if(next) free(next);
 
-  /* TODO: release any othermemoryyou were using for bookkeeping
-     when doing a re-initialization! */
-
-
+  /* Initialize memory management structures */
   myMemory = malloc(sz);
-	
-  /* TODO: Initialize memory management structure. */
+  head = malloc(sizeof(struct memoryList));
+  head->size = sz;
+  head->alloc = 0;
+  head->ptr = myMemory;
 
-
+  /* Memory list should be circular for next-fit */
+  head->last = head;
+  head->next = head;
 }
 
 /* Allocate a block of memory with the requested size.
@@ -105,13 +107,41 @@ void *mymalloc(size_t requested) {
     return NULL;
   }
 
-  // TODO: allocate memory
-  return NULL;
+  if(block->size > requested) {
+    /* Construct container for unallocated remainder of this block */
+    struct memoryList* remainder = malloc(sizeof(struct memoryList));
+    
+    /* Insert into linked list */
+    remainder->next = block->next;
+    remainder->next->last = remainder;
+    remainder->last = block;
+    block->next = remainder;
+    
+    /* Divide up allocated memory */
+    remainder->size = block->size - requested;
+    remainder->alloc = 0;
+    remainder->ptr = block->ptr + requested;
+    block->size = requested;
+  }
+  
+  block->alloc = 1;
+  
+  /* Return pointer to the allocated block */
+  return block->ptr;
 }
 
 /* Find the first available block of memory larger than the requested size. */
 struct memoryList* first_block(size_t requested) {
-  // TODO
+
+  /* Iterate over memory list, searching for the target block's container */
+  struct memoryList* index = head;
+  do {
+    if(!(index->alloc) && index->size >= requested) {
+      return index;
+    }
+  } while((index = index->next) != head);
+
+  /* No suitable block in the memory list */
   return NULL;
 }
 
@@ -131,12 +161,40 @@ struct memoryList* worst_block(size_t requested) {
 struct memoryList* next_block(size_t requested) {
   // TODO
   return NULL;
-
 }
 
 /* Frees a block of memory previously allocated by mymalloc. */
 void myfree(void* block) {
-  return;
+
+  /* Iterate over memory list, searching for the target block's container */
+  struct memoryList* container = head;
+  do {
+    if(container->ptr == block) {
+      break;
+    }
+  } while((container = container->next) != head);
+
+  /* Flag this block as freed */
+  container->alloc = 0;
+
+  /* If the previous block is also free, reduce to one contiguous block. */
+  if(container != head && !(container->last->alloc)) {
+    struct memoryList* prev = container->last;
+    prev->next = container->next;
+    prev->next->last = prev;
+    prev->size += container->size;
+    free(container);
+    container = prev;
+  }
+
+  /* If the next block is also free, reduce to one contiguous block. */
+  if(container->next != head && !(container->next->alloc)) {
+    struct memoryList* next = container->next;
+    container->next = next->next;
+    container->next->last = container;
+    container->size += next->size;
+    free(next);
+  }
 }
 
 /****** Memory status/property functions ******
@@ -147,32 +205,83 @@ void myfree(void* block) {
 
 /* Get the number of contiguous areas of free space in memory. */
 int mem_holes() {
-  return 0;
+  return mem_small_free(mySize + 1);
 }
 
 /* Get the number of bytes allocated */
 int mem_allocated() {
-  return 0;
+  return mySize - mem_free();
 }
 
 /* Number of non-allocated bytes */
-int mem_free() {
-  return 0;
+int mem_free() {    
+  int count = 0;
+
+  /* Iterate over memory list */
+  struct memoryList* index = head;
+  do {
+    /* Add to total only if this block isn't allocated */
+    if(!(index->alloc)) {
+      count += index->size;
+    }
+  } while((index = index->next) != head);
+
+  return count;
 }
 
 /* Number of bytes in the largest contiguous area of unallocated memory */
 int mem_largest_free() {
-  return 0;
+  
+  int max_size = 0;
+
+  /* Iterate over memory list */
+  struct memoryList* index = head;
+  do {
+    if(!(index->alloc) && index->size > max_size) {
+      max_size = index->size;
+    }
+  } while((index = index->next) != head);
+
+  return max_size;
 }
 
 /* Number of free blocks smaller than "size" bytes. */
 int mem_small_free(int size) {
-  return 0;
+  
+  int count = 0;
+
+  /* Iterate over memory list */
+  struct memoryList* index = head;
+  do {
+    /* Add to total only if this block's size is less than the target */
+    if(index->size <= size) {
+      count += !(index->alloc);
+    }
+  } while((index = index->next) != head);
+
+  return count;
 }       
 
-/* Is a particular byte allocated or not? */
+/* Is a particular byte allocated or not?
+ * A necessary precondition of this function is that ptr points to somewhere in
+ * the block allocated for our memory list. In fact, C99 defines pointer
+ * comparison only for pointers that point to parts of the same memory object.
+ */
 char mem_is_alloc(void *ptr) {
-  return 0;
+
+  /* Iterate over the memory list */
+  struct memoryList* index = head;
+  while(index->next != head) {
+    /* If the next block's ptr is after the target,
+       the target must be in this block */
+    if(ptr < index->next->ptr) {
+      return index->alloc;
+    }
+    index = index->next;
+  }
+
+  /* Iterator is now at the last block, so we assume the target is here */
+  return index->alloc;
 }
 
 /* 
@@ -223,7 +332,6 @@ strategies strategyFromString(char * strategy) {
   }
 }
 
-
 /* 
  * These functions are for you to modify however you see fit.  These will not
  * be used in tests, but you may find them useful for debugging.
@@ -231,7 +339,16 @@ strategies strategyFromString(char * strategy) {
 
 /* Use this function to print out the current contents of memory. */
 void print_memory() {
-  return;
+  printf("Memory List {\n");
+  /* Iterate over memory list */
+  struct memoryList* index = head;
+  do {
+    printf("\tBlock %p,\tsize %d,\t%s\n",
+           index->ptr,
+           index->size,
+           (index->alloc ? "[ALLOCATED]" : "[FREE]"));
+  } while((index = index->next) != head);
+  printf("}\n");
 }
 
 /* Use this function to track memory allocation performance.  
