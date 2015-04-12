@@ -133,7 +133,7 @@ void *mymalloc(size_t requested) {
 /* Find the first available block of memory larger than the requested size. */
 struct memoryList* first_block(size_t requested) {
 
-  /* Iterate over memory list, searching for the target block's container */
+  /* Get first suitable block in list */
   struct memoryList* index = head;
   do {
     if(!(index->alloc) && index->size >= requested) {
@@ -153,8 +153,20 @@ struct memoryList* best_block(size_t requested) {
 
 /* Find the largest available block larger than the requested size. */
 struct memoryList* worst_block(size_t requested) {
-  // TODO
-  return NULL;
+  
+  /* Get largest unallocated block in list*/
+  struct memoryList* index = head, *max = NULL;
+  do {
+    if(!(index->alloc) && (!max || index->size > max->size) ) {
+      max = index;
+    }
+  } while((index = index->next) != head);
+
+  if(max->size >= requested) {
+    return max;
+  } else {
+    return NULL;
+  }
 }
 
 /* Find the first suitable block after the last block allocated. */
