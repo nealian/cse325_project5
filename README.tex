@@ -43,22 +43,24 @@
 \maketitle
 
 %%% INTRODUCTION %%%
-The SANIC TEEM Maniac Middle Management Memory Minder (hereafter referred to as \textit{the project}) is 
+The SANIC TEEM Maniac Middle Management Memory Minder (hereafter referred to as \textit{the project}) is a highly-configurable simulated memory manager with a number of different contiguous memory allocation strategies available for use. Specifically, these allocation strategies are as follows:
 
 \begin{description}
-  \item[First Fit] ,
+  \item[First Fit], which will allocate the suitable\footnote{Here, a ``suitable'' block is a block that is not currently allocated and is large enough to fit the new data.} block that is sequentially first in memory,
 
-  \item[Best Fit] ,
+  \item[Best Fit], which will allocate the smallest suitable block,
 
-  \item[Worst Fit] , and
+  \item[Worst Fit], which will allocate the largest suitable block, and
 
-  \item[Next Fit]
+  \item[Next Fit], which will allocate the suitable block that is sequentially first in memory \textbf{after the last block allocated,} wrapping around to the start of addressable space upon reaching the end.
 \end{description}
 
 Most of the codebase of this project was given as part of the lab assignment. We have implemented the functionality of the project in the following files:
 
 \begin{itemize}
-  \item 
+  \item Implementation of all described functionality in \texttt{mymem.c}.
+
+  \item This README, the \LaTeX\hspace{0em} source of which may be found in \texttt{README.tex}.
 
   \item Build targets for the added files and this README in the \texttt{Makefile}.
 \end{itemize}
