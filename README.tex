@@ -10,10 +10,11 @@
 
 \usetikzlibrary{positioning} % Relative positioning of nodes
 \usetikzlibrary{automata} % Handy stuff for state machine diagrams
+\usetikzlibrary{shapes.multipart} % Multiline node labels
 
 \tikzstyle{every state}=[fill=orange!30, draw=orange, very thick]
-\tikzstyle{lock}=[->, draw=cyan, very thick, every to/.style={bend left=20}]
-\tikzstyle{unlock}=[->, draw=magenta, very thick, every to/.style={bend left=20}]
+\tikzstyle{free}=[fill=white]
+\tikzstyle{link}=[->, draw=cyan, very thick]
 
 \lstdefinestyle{ShellStyle} {
   basicstyle=\small\ttfamily,
@@ -115,6 +116,72 @@ The implementation of this project relies on a number of globally- and staticall
   \item \texttt{void *myMemory}, a pointer to the memory pool from which all memory allocated by our manager is drawn.
   \item \texttt{size\_t mySize}, which holds the size (in bytes) of the memory pool.
 \end{itemize}
+
+\subsection*{Memory List}
+\begin{figure}[h]
+  \centering
+  \textit{Before allocation:}\\
+  \begin{tikzpicture}[node distance = 1.5cm, auto, every text node part/.style={align=center, font=\footnotesize}]
+    \node[state]       (block1)                     {\texttt{block 1}\\\textit{allocated}};
+    \node[state, free] (block2) [right = of block1] {\texttt{block 2}\\\textit{size < n}};
+    \node[state]       (block3) [right = of block2] {\texttt{block 3}\\\textit{allocated}};
+    \node[state, free] (block4) [right = of block3] {\texttt{block 4}\\\textit{size $k \geq n$}};
+
+    \node[state]       (blockn) [above right = of block2] {\texttt{new}\\\textit{size n}};
+
+    \draw[link] (block1) to (block2);
+    \draw[link] (block2) to (block3);
+    \draw[link] (block3) to (block4);
+    \draw[link] (block4) to[bend left=40] (block1);
+  \end{tikzpicture}
+
+  \textit{After allocation:}\\
+  \begin{tikzpicture}[node distance = 1.5cm, auto, every text node part/.style={align=center, font=\footnotesize}]
+    \node[state]       (block1)                     {\texttt{block 1}\\\textit{allocated}};
+    \node[state, free] (block2) [right = of block1] {\texttt{block 2}\\\textit{size < n}};
+    \node[state]       (block3) [right = of block2] {\texttt{block 3}\\\textit{allocated}};
+    \node[state]       (blockn) [right = of block3] {\texttt{new}\\\textit{size n}};    
+    \node[state, free] (block4) [right = of blockn] {\texttt{block 4}\\\textit{size $k - n$}};
+
+
+    \draw[link] (block1) to (block2);
+    \draw[link] (block2) to (block3);
+    \draw[link] (block3) to (blockn);
+    \draw[link] (blockn) to (block4);
+    \draw[link] (block4) to[bend left=40] (block1);
+  \end{tikzpicture}
+
+  \caption{Allocating a block of size $n$.}
+  \label{fig:allocation}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \textit{Before freeing block 3:}\\
+  \begin{tikzpicture}[node distance = 1.5cm, auto, every text node part/.style={align=center, font=\footnotesize}]
+    \node[state]       (block1)                     {\texttt{block 1}\\\textit{allocated}};
+    \node[state, free] (block2) [right = of block1] {\texttt{block 2}\\\textit{size $x$}};
+    \node[state]       (block3) [right = of block2] {\texttt{block 3}\\\textit{size $y$}};
+    \node[state, free] (block4) [right = of block3] {\texttt{block 4}\\\textit{size $z$}};
+
+    \draw[link] (block1) to (block2);
+    \draw[link] (block2) to (block3);
+    \draw[link] (block3) to (block4);
+    \draw[link] (block4) to[bend left=40] (block1);
+  \end{tikzpicture}\\
+  \textit{After freeing block 3:}\\
+  \begin{tikzpicture}[node distance = 1.5cm, auto, every text node part/.style={align=center, font=\footnotesize}]
+    \node[state]       (block1)                     {\texttt{block 1}\\\textit{allocated}};
+    \node[state, free] (block2) [right = of block1] {\texttt{block 2}\\\textit{size $x+y+z$}};
+
+    \draw[link] (block1) to (block2);
+    \draw[link] (block2) to[bend left=40] (block1);
+  \end{tikzpicture}
+
+  \caption{Freeing an allocated block.}
+  \label{fig:free}
+\end{figure}
+
 
 %%% BUGS %%%
 \section*{Known Bugs}
