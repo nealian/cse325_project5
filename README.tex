@@ -117,7 +117,25 @@ The implementation of this project relies on a number of globally- and staticall
   \item \texttt{size\_t mySize}, which holds the size (in bytes) of the memory pool.
 \end{itemize}
 
+The initial project files left prototypes of functions that should be fleshed out; the operation of each of these functions are
+
+\begin{itemize}
+  \item \texttt{struct memoryList* first\_block(size\_t requested)}, returns a pointer to the first available memory block in the list that is greater or equal to the size requested.
+  \item \texttt{struct memoryList* best\_block(size\_t requested)}, returns a pointer to the smallest available memory block in the list that is greater or equal to the size requested
+  \item \texttt{struct memoryList* worst\_block(size\_t requested)}, returns a pointer to the largest available memory block in the list that is greater or equal to the size requested
+  \item \texttt{struct memoryList* next\_block(size\_t requested)}, returns a pointer to the next available memory block in the list that is greater or equal to the size requested after the last block allocated
+  \item \texttt{int mem\_holes()}, returns the number of contiguous areas of free space in the memory available for allocation
+  \item \texttt{int mem\_allocated()}, returns the number of bytes of memory allocated
+  \item \texttt{int mem\_free()}, returns the number of bytes of memory unallocated
+  \item \texttt{int mem\_largest\_free()}, returns the number of bytes of the largest contiguous unallocated block of memory
+  \item \texttt{int mem\_small\_free(int size)}, returns the number of unallocated blocks smaller than the indicated size
+  \item \texttt{int mem\_isalloc(void *ptr)}, returns the boolean value of whether or not the block pointed to is allocated (ptr must point to somewhere in the memory set aside for allocation)
+    
+\end{itemize}
+
 \subsection*{Memory List}
+The memory pool simulated in this project is structured internally as a circularly-linked-list, and indeed the functions \texttt{mymalloc} and \texttt{myfree} are more-or-less glorified insertion and removal methods for the memory list, with some additional bookkeeping features. \texttt{mymalloc} switches on allocation strategy to determine where to insert a new element, and must take the space allocated to the new node from an existing free node. This behavior is illustrated in figure~\ref{fig:allocation}.
+
 \begin{figure}[h]
   \centering
   \textit{Before allocation:}\\
@@ -155,6 +173,8 @@ The implementation of this project relies on a number of globally- and staticall
   \label{fig:allocation}
 \end{figure}
 
+The \texttt{myfree} function also performs an important bookkeeping behavior: if freeing a block of allocated memory would create a free node adjacent to an existing free node, those nodes are combined. In this way, no two adjacent nodes in the memory list may be free, excepting the false adjacency of the last node to the first (because the list is circularly-linked). This behavior is illustrated in figure~\ref{fig:free}.
+
 \begin{figure}[h]
   \centering
   \textit{Before freeing block 3:}\\
@@ -181,7 +201,6 @@ The implementation of this project relies on a number of globally- and staticall
   \caption{Freeing an allocated block.}
   \label{fig:free}
 \end{figure}
-
 
 %%% BUGS %%%
 \section*{Known Bugs}
