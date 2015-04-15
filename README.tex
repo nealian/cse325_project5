@@ -91,10 +91,18 @@ Most of the codebase of this project was given as part of the lab assignment. We
   \item \texttt{strategy} is the memory allocation strategy to use, which may be \texttt{first}, \texttt{best}, \texttt{worst}, \texttt{next}, or \texttt{all} as desired. These correspond to the first fit, best fit, worst fit, and next fit strategies (or all of the above) respectively.
 \end{itemize}
 
-
 %%% EXAMPLES %%%
 \section*{Examples}
 \begin{lstlisting}[style=ShellStyle]
+$ ./mem -test all all 2> /dev/null
+Running tests...
+ 1.alloc1              ::pass
+ 2.alloc2              ::pass
+ 3.alloc3              ::pass
+ 4.alloc4              ::pass
+ 5.stress              ::pass
+
+Test Results:5 tests,5 passed,0 failed.
 \end{lstlisting}
 
 %%% DESIGN %%%
@@ -125,5 +133,6 @@ Most of the codebase of this project was given as part of the lab assignment. We
 
 %%% BUGS %%%
 \section*{Known Bugs}
+The code for which SANIC TEEM is responsible (contained in \texttt{mymem.c}) has no known bugs or memory leaks. There appear to be memory leaks present in the provided code, which we have made no effort to patch.
 
 \end{document}
