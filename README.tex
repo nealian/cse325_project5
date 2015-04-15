@@ -116,6 +116,22 @@ The implementation of this project relies on a number of globally- and staticall
   \item \texttt{size\_t mySize}, which holds the size (in bytes) of the memory pool.
 \end{itemize}
 
+The initial project files left prototypes of functions that should be fleshed out; the operation of each of these functions are
+
+\begin{itemize}
+  \item \texttt{struct memoryList* first_block(size_t requested)}, returns a pointer to the first available memory block in the list that is greater or equal to the size requested.
+  \item \texttt{struct memoryList* best_block(size_t requested)}, returns a pointer to the smallest available memory block in the list that is greater or equal to the size requested
+  \item \texttt{struct memoryList* worst_block(size_t requested)}, returns a pointer to the largest available memory block in the list that is greater or equal to the size requested
+  \item \texttt{struct memoryList* next_block(size_t requested)}, returns a pointer to the next available memory block in the list that is greater or equal to the size requested after the last block allocated
+  \item \texttt{int mem_holes()}, returns the number of contiguous areas of free space in the memory available for allocation
+  \item \texttt{int mem_allocated()}, returns the number of bytes of memory allocated
+  \item \texttt{int mem_free()}, returns the number of bytes of memory unallocated
+  \item \texttt{int mem_largest_free()}, returns the number of bytes of the largest contiguous unallocated block of memory
+  \item \texttt{int mem_small_free(int size)}, returns the number of unallocated blocks smaller than the indicated size
+  \item \texttt{int mem_isalloc(void *ptr)}, returns the boolean value of whether or not the block pointed to is allocated (ptr must point to somewhere in the memory set aside for allocation)
+    
+\end{itemize}
+
 %%% BUGS %%%
 \section*{Known Bugs}
 The code for which SANIC TEEM is responsible (contained in \texttt{mymem.c}) has no known bugs or memory leaks. There appear to be memory leaks present in the provided code, which we have made no effort to patch.
