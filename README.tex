@@ -107,29 +107,14 @@ Test Results:5 tests,5 passed,0 failed.
 
 %%% DESIGN %%%
 \section*{Design \& Implementation}
-% Be sure and update this as we make progress...
-\subsection*{Organization}
+The implementation of this project relies on a number of globally- and statically-visible structures and variables. While this is not an ideal design pattern by any means, these global variables are an artifact of the code given to our team as part of the assignment and as such have not been eliminated in the interest of compatibility. Specifically, these globally-visible structures are
 
-
-%% \begin{figure}[h]
-%%   \centering
-%%   \begin{tikzpicture}[node distance = 2cm, auto]
-%%     \node         (insert)                                     {\texttt{enter\_sched\_queue}};
-%%     \node[state]  (production)  [below left = of insert]       {\phantom{-}\textit{production}\phantom{-}};
-%%     \node[state]  (consumption) [below right = of insert]      {\textit{consumption}};
-%%     \node         (remove)      [below left = of consumption]  {\texttt{leave\_sched\_queue}};
-%%     \node         (wait)        [below right = of consumption] {\texttt{wait\_for\_queue}};
-
-%%     \draw[lock]   (production)  to (insert);
-%%     \draw[unlock] (insert)      to (consumption);
-%%     \draw[lock]   (consumption) to (remove);
-%%     \draw[unlock] (remove)      to (production);
-%%     \draw[lock]   (consumption) to (wait);
-%%     \draw[unlock] (wait)        to (consumption);
-%%   \end{tikzpicture}
-%%   \caption{Scheduling queue capacity synchronization.}
-%%   \label{fig:qsync}
-%% \end{figure}
+\begin{itemize}
+  \item \texttt{struct memoryList *head}, a pointer to the head of the memory list.
+  \item \texttt{struct memoryList *next}, a pointer to most recently allocated block of memory. This is used by the next-fit allocation strategy.
+  \item \texttt{void *myMemory}, a pointer to the memory pool from which all memory allocated by our manager is drawn.
+  \item \texttt{size\_t mySize}, which holds the size (in bytes) of the memory pool.
+\end{itemize}
 
 %%% BUGS %%%
 \section*{Known Bugs}
