@@ -69,6 +69,9 @@ Most of the codebase of this project was given as part of the lab assignment. We
   \item \texttt{make} to build the project normally.
 
   \item \texttt{make test} to run the provided testing harness.
+  \begin{itemize}
+    \item \texttt{make test 2> /dev/null} to suppress error output during testing (does not suppress success or failure of tests). By design, the program will print an error message when memory allocation fails for any reason. The provided stress test will sometimes attempt to allocate more memory than will fit in any existing block, which will fail and produce an error as expected. Use this command to prevent stderr from getting spammed.
+  \end{itemize}
 
   \item \texttt{make doc} to build this README. Requires \texttt{pdflatex} and a number of \LaTeX\hspace{0em} packages, all of which are included in the popular \textbf{TeX Live} distribution.
 
